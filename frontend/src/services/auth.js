@@ -10,3 +10,6 @@ export const verifyOTP = (email, otp) =>
 
 export const login = (email, password) =>
   axios.post(`${API}/login`, { email, password });
+
+export const forgotPassword = (email) =>
+  axios.post(`${API}/forgot-password`, { email });

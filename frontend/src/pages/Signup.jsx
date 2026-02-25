@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import Swal from "sweetalert2";
 import { signup, verifyOTP } from "../services/auth";
 import { useNavigate } from "react-router-dom";
+import skillImg from "../assets/skillgap.png";
 
 function Signup() {
   const navigate = useNavigate();
@@ -17,242 +18,281 @@ function Signup() {
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [otpVerified, setOtpVerified] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  // ✅ Validation helpers
-  const validEmail = (email) =>
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-  const validPassword = (pass) =>
-    /^(?=.*\d).{8,}$/.test(pass);
+  // Toast
+  const Toast = Swal.mixin({
+    toast: true,
+    position: "top-end",
+    timer: 1600,
+    showConfirmButton: false,
+  });
 
   // ✅ Send OTP
   const handleSendOTP = async () => {
     if (!form.username || !form.email || !form.password) {
-      return Swal.fire(
-        "Missing Fields",
-        "Fill username, email & password first",
-        "warning"
-      );
+      return Swal.fire("Missing Fields", "Fill all fields first", "warning");
     }
 
-    if (!validEmail(form.email)) {
-      return Swal.fire("Invalid Email", "Enter valid email", "error");
-    }
-
-    if (!validPassword(form.password)) {
-      return Swal.fire(
-        "Weak Password",
-        "Password must be 8+ characters with a number",
-        "warning"
-      );
+    if (form.password !== form.confirmPassword) {
+      return Swal.fire("Error", "Passwords do not match", "error");
     }
 
     try {
-      await signup(form);
-      setOtpSent(true);
+      setLoading(true);
 
       Swal.fire({
-        title: "OTP Sent!",
-        text: "Check your email inbox",
-        icon: "success",
-        confirmButtonColor: "#6b21a8",
+        title: "Sending OTP...",
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
       });
+
+      await signup(form); // backend sends OTP
+
+      Swal.close();
+      setOtpSent(true);
+
+      Toast.fire({
+        icon: "success",
+        title: "OTP Sent to Email 📩",
+      });
+
     } catch (err) {
+      Swal.close();
       Swal.fire(
         "Error",
-        err.response?.data?.message || "Signup failed",
+        err.response?.data?.message || "Failed to send OTP",
         "error"
       );
+    } finally {
+      setLoading(false);
     }
   };
 
   // ✅ Verify OTP
   const handleVerifyOTP = async () => {
+    if (!otp) {
+      return Swal.fire("Enter OTP", "Please enter OTP first", "warning");
+    }
+
     try {
+      setLoading(true);
+
+      Swal.fire({
+        title: "Verifying...",
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
+      });
+
       await verifyOTP(form.email, otp);
+
+      Swal.close();
       setOtpVerified(true);
 
-      Swal.fire("Success", "OTP Verified!", "success");
+      Toast.fire({
+        icon: "success",
+        title: "OTP Verified ✅",
+      });
+
     } catch {
-      Swal.fire("Error", "Invalid OTP", "error");
+      Swal.close();
+      Swal.fire("Invalid OTP ❌", "Please try again", "error");
+    } finally {
+      setLoading(false);
     }
   };
 
-  // ✅ Create Account
+  // ✅ Final Create Account
   const handleCreateAccount = () => {
     if (!otpVerified) {
       return Swal.fire(
-        "Verify OTP",
-        "Please verify OTP first",
+        "Verify OTP First",
+        "Please verify OTP before proceeding",
         "warning"
       );
     }
 
-    if (form.password !== form.confirmPassword) {
-      return Swal.fire(
-        "Password Error",
-        "Passwords do not match",
-        "error"
-      );
-    }
-
-    Swal.fire({
-      title: "Account Created!",
-      text: "Redirecting to login...",
+    Toast.fire({
       icon: "success",
-      timer: 2000,
-      showConfirmButton: false,
+      title: "Account Created 🎉",
     });
 
-    setTimeout(() => navigate("/login"), 2000);
+    setTimeout(() => navigate("/login"), 1500);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-200 via-purple-300 to-indigo-400 flex items-center justify-center">
+<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 via-purple-400 to-indigo-200">    <div className="w-[1100px] h-[650px] bg-white rounded-2xl shadow-2xl flex overflow-hidden">
 
-      <motion.div
-        initial={{ opacity: 0, scale: 0.92 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
-        className="bg-white/30 backdrop-blur-xl p-10 rounded-3xl shadow-2xl w-[440px]"
-      >
+     
+        {/* LEFT PANEL */}
+<div className="w-1/2 relative overflow-hidden">
 
-        <h2 className="text-3xl font-bold mb-6 text-center text-purple-900">
-          Create Account
-        </h2>
+  {/* Background Image */}
+  <img
+    src={skillImg}
+    alt="Skill Gap"
+    className="absolute inset-0 w-full h-full object-cover"
+  />
 
-        {/* Username */}
-        <input
-          placeholder="Username"
-          className="input"
-          onChange={(e) =>
-            setForm({ ...form, username: e.target.value })
-          }
-        />
+  {/* Dark Overlay */}
+  {/* <div className="absolute inset-0 bg-gradient-to-br from-purple-900/80 via-purple-800/70 to-indigo-900/80"></div> */}
 
-        {/* Email + Send OTP */}
-        <div className="flex gap-2 mb-4">
-          <input
-            placeholder="Email"
-            className="input flex-1"
-            onChange={(e) =>
-              setForm({ ...form, email: e.target.value })
-            }
-          />
+  {/* Content */}
+  <div className="relative z-10 text-white p-12 flex flex-col justify-between h-full">
 
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleSendOTP}
-            className="btn-secondary"
-          >
-            Send OTP
-          </motion.button>
-        </div>
+    <h1 className="text-2xl font-bold">Skill Analyzer</h1>
 
-        {/* OTP Section */}
-        {otpSent && (
+    <div>
+      <h2 className="text-4xl font-bold leading-snug">
+        Bridge the <span className="text-cyan-300">Skill Gap</span>  
+        <br /> and Build Your Future.
+      </h2>
+
+      <p className="mt-6 text-sm opacity-90">
+        Learn smarter. Track progress. Grow faster.
+      </p>
+    </div>
+
+    <div className="text-sm opacity-80">
+      {/* Empowering 9.5k+ learners worldwide 🌍 */}
+    </div>
+
+  </div>
+</div>
+        {/* RIGHT PANEL */}
+<div className="w-1/2 flex items-center justify-center p-12 bg-gradient-to-br from-purple-20 to-indigo-100">
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex gap-2 mb-4"
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+            className="w-full max-w-sm"
           >
+            <h2 className="text-3xl font-bold text-gray-800 mb-6">
+              Sign Up
+            </h2>
+
             <input
-              placeholder="Enter OTP"
-              className="input flex-1"
-              onChange={(e) => setOtp(e.target.value)}
+              placeholder="Username"
+              className="input"
+              onChange={(e) =>
+                setForm({ ...form, username: e.target.value })
+              }
             />
 
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleVerifyOTP}
-              className="btn-success"
+            {/* Email + Send OTP */}
+            <div className="flex gap-2 mb-3">
+              <input
+                placeholder="Email"
+                className="input flex-1"
+                onChange={(e) =>
+                  setForm({ ...form, email: e.target.value })
+                }
+              />
+
+              <button
+                onClick={handleSendOTP}
+                disabled={loading}
+                className="btn-secondary"
+              >
+                Send OTP
+              </button>
+            </div>
+
+            {/* OTP Section */}
+            {otpSent && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex gap-2 mb-3"
+              >
+                <input
+                  placeholder="Enter OTP"
+                  className="input flex-1"
+                  onChange={(e) => setOtp(e.target.value)}
+                />
+
+                <button
+                  onClick={handleVerifyOTP}
+                  disabled={loading}
+                  className="btn-success"
+                >
+                  Verify
+                </button>
+              </motion.div>
+            )}
+
+            <input
+              type="password"
+              placeholder="Password"
+              className="input"
+              onChange={(e) =>
+                setForm({ ...form, password: e.target.value })
+              }
+            />
+
+            <input
+              type="password"
+              placeholder="Confirm Password"
+              className="input"
+              onChange={(e) =>
+                setForm({ ...form, confirmPassword: e.target.value })
+              }
+            />
+
+            <button
+              onClick={handleCreateAccount}
+              disabled={!otpVerified}
+              className={`btn-primary ${
+                !otpVerified ? "opacity-50 cursor-not-allowed" : ""
+              }`}
             >
-              Verify
-            </motion.button>
+              Create Account
+            </button>
+
+            <p className="text-sm text-center mt-4">
+              Already have an account?{" "}
+              <span
+                onClick={() => navigate("/login")}
+                className="text-purple-700 cursor-pointer font-semibold"
+              >
+                Sign In
+              </span>
+            </p>
+
           </motion.div>
-        )}
-
-        {/* Password */}
-        <div className="relative mb-4">
-          <input
-            type={showPassword ? "text" : "password"}
-            placeholder="Password"
-            className="input pr-10"
-            onChange={(e) =>
-              setForm({ ...form, password: e.target.value })
-            }
-          />
-
-          <span
-            onClick={() => setShowPassword(!showPassword)}
-            className="eye"
-          >
-            {showPassword ? "🙈" : "👁️"}
-          </span>
         </div>
-
-        {/* Confirm Password */}
-        <div className="relative mb-4">
-          <input
-            type={showConfirm ? "text" : "password"}
-            placeholder="Confirm Password"
-            className="input pr-10"
-            onChange={(e) =>
-              setForm({
-                ...form,
-                confirmPassword: e.target.value,
-              })
-            }
-          />
-
-          <span
-            onClick={() => setShowConfirm(!showConfirm)}
-            className="eye"
-          >
-            {showConfirm ? "🙈" : "👁️"}
-          </span>
-        </div>
-
-        {/* Create Account */}
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={handleCreateAccount}
-          className="btn-primary"
-        >
-          Create Account
-        </motion.button>
-
-      </motion.div>
+      </div>
 
       {/* Styles */}
       <style jsx>{`
         .input {
           width: 100%;
           padding: 14px;
-          border-radius: 12px;
-          background: rgba(255, 255, 255, 0.75);
-          outline: none;
-          margin-bottom: 12px;
+          border-radius: 10px;
+          border: 1px solid #ddd;
+          margin-bottom: 14px;
           font-size: 14px;
+        }
+
+        .input:focus {
+          outline: none;
+          border-color: #7c3aed;
+          box-shadow: 0 0 0 2px rgba(124,58,237,0.2);
         }
 
         .btn-primary {
           width: 100%;
           padding: 14px;
-          border-radius: 12px;
-          background: #581c87;
+          background: linear-gradient(90deg,#7c3aed,#6366f1);
           color: white;
+          border-radius: 10px;
           font-weight: 600;
+          margin-top: 10px;
         }
 
         .btn-secondary {
           padding: 12px 14px;
-          border-radius: 12px;
+          border-radius: 10px;
           background: #7c3aed;
           color: white;
           font-size: 13px;
@@ -260,21 +300,12 @@ function Signup() {
 
         .btn-success {
           padding: 12px 14px;
-          border-radius: 12px;
+          border-radius: 10px;
           background: #16a34a;
           color: white;
           font-size: 13px;
         }
-
-        .eye {
-          position: absolute;
-          right: 12px;
-          top: 14px;
-          cursor: pointer;
-          font-size: 18px;
-        }
       `}</style>
-
     </div>
   );
 }

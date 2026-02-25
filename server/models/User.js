@@ -6,6 +6,13 @@ const userSchema = new mongoose.Schema({
   password: String,
   otp: String,
   verified: { type: Boolean, default: false },
+
+  profilePic: { type: String, default: "" },
+  bio: { type: String, default: "" },
+
+  // 🔥 ADD THESE FOR FORGOT PASSWORD
+  resetToken: String,
+  resetTokenExpiry: Date,
 });
 
 module.exports = mongoose.model("User", userSchema);
