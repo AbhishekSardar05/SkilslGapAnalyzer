@@ -7,11 +7,12 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 
+
 // SIGNUP → Send OTP
 router.post("/signup", async (req, res) => {
+
   const { username, email, password } = req.body;
 
-  // Check existing verified user
   const existingUser = await User.findOne({
     email,
     verified: true,
@@ -28,22 +29,26 @@ router.post("/signup", async (req, res) => {
   let user = await User.findOne({ email });
 
   if (!user) {
+
     user = new User({
       username,
       email,
       password: await bcrypt.hash(password, 10),
+
+      // ⭐ FORCE ROLE
+      role: "Student",
     });
   }
 
   user.otp = otp;
+
   await user.save();
 
   await sendOTP(email, otp);
 
   res.json({ message: "OTP sent" });
+
 });
-
-
 // VERIFY OTP
 router.post("/verify-otp", async (req, res) => {
   const { email, otp } = req.body;
@@ -60,9 +65,11 @@ router.post("/verify-otp", async (req, res) => {
   res.json({ message: "Account verified" });
 });
 
+
 // LOGIN
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+
+  const { email, password, role } = req.body;
 
   const user = await User.findOne({ email });
 
@@ -74,11 +81,27 @@ router.post("/login", async (req, res) => {
   if (!match)
     return res.status(400).json({ message: "Wrong password" });
 
-  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+  // ⭐ ROLE CHECK
+  if (user.role !== role) {
+    return res.status(403).json({
+      message: "Access denied for this role",
+    });
+  }
 
-  res.json({ token });
+  const token = jwt.sign(
+    {
+      id: user._id,
+      role: user.role,
+    },
+    process.env.JWT_SECRET
+  );
+
+  res.json({
+    token,
+    role: user.role,
+  });
+
 });
-
 // forget password
 const transporter = nodemailer.createTransport({
   service: "gmail",

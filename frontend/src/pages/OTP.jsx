@@ -1,47 +1,66 @@
 import { useState } from "react";
 import { verifyOTP } from "../services/auth";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 function OTP() {
-  const [otp, setOtp] = useState("");
+
+  const [otp,setOtp] = useState("");
   const email = localStorage.getItem("email");
   const navigate = useNavigate();
 
   const handleVerify = async () => {
-    try {
-      await verifyOTP(email, otp);
-      alert("Account verified successfully!");
+
+    try{
+
+      await verifyOTP(email,otp);
+
+      Swal.fire(
+        "Success 🎉",
+        "Account verified successfully",
+        "success"
+      );
+
       navigate("/login");
-    } catch {
-      alert("Invalid OTP");
+
+    }catch{
+
+      Swal.fire(
+        "Invalid OTP ❌",
+        "Please try again",
+        "error"
+      );
+
     }
+
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-200 via-purple-300 to-indigo-400 flex items-center justify-center">
+  return(
 
-      <div className="bg-white/30 backdrop-blur-xl p-10 rounded-3xl shadow-2xl w-96">
+<div className="min-h-screen bg-gradient-to-br from-purple-200 via-purple-300 to-indigo-400 flex items-center justify-center">
 
-        <h2 className="text-3xl font-bold mb-6 text-center">
-          Verify OTP
-        </h2>
+<div className="bg-white/30 backdrop-blur-xl p-10 rounded-3xl shadow-2xl w-96">
 
-        <input
-          placeholder="Enter OTP"
-          className="w-full p-3 mb-4 rounded-lg bg-white/70 outline-none"
-          onChange={(e) => setOtp(e.target.value)}
-        />
+<h2 className="text-3xl font-bold mb-6 text-center">
+Verify OTP
+</h2>
 
-        <button
-          onClick={handleVerify}
-          className="w-full bg-purple-700 text-white p-3 rounded-lg font-semibold"
-        >
-          Verify OTP
-        </button>
+<input
+placeholder="Enter OTP"
+className="w-full p-3 mb-4 rounded-lg bg-white/70 outline-none"
+onChange={(e)=>setOtp(e.target.value)}
+/>
 
-      </div>
+<button
+onClick={handleVerify}
+className="w-full bg-purple-700 text-white p-3 rounded-lg font-semibold"
+>
+Verify OTP
+</button>
 
-    </div>
+</div>
+</div>
+
   );
 }
 

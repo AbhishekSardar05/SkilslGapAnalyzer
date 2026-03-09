@@ -146,6 +146,25 @@ router.get("/history/:email", async (req, res) => {
     res.status(500).json({ message: "Failed to fetch history" });
   }
 });
+// Get Student Resume Data
+
+router.get("/student/:email", async (req, res) => {
+
+  try {
+
+    const data = await ResumeAnalysis.find({
+      email: req.params.email
+    }).sort({ createdAt: -1 });
+
+    res.json(data);
+
+  } catch (err) {
+
+    res.status(500).json({ message: "Failed to fetch resume data" });
+
+  }
+
+});
 
 // ================================
 // 🗑 Delete Resume Analysis

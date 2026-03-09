@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const axios = require("axios");
-
+const SkillGap = require("../models/SkillGap");
 router.post("/", async (req, res) => {
 
   const { userSkills, jobSkills } = req.body;
@@ -128,6 +128,24 @@ Return only JSON.
         }
       ]
     });
+
+  }
+
+});
+
+router.get("/student/:email", async (req, res) => {
+
+  try {
+
+    const reports = await SkillGap.find({
+      email: req.params.email
+    }).sort({ createdAt: -1 });
+
+    res.json(reports);
+
+  } catch (err) {
+
+    res.status(500).json({ message: "Failed to fetch reports" });
 
   }
 

@@ -9,6 +9,9 @@ import Profile from "./pages/Profile";
 import ResetPassword from "./pages/ResetPassword";
 import ResumeAnalyzer from "./pages/ResumeAnalyzer";
 import SkillGapAnalyzer from "./pages/SkillGapAnalyzer";
+import TPOStudents from "./pages/TPOStudents";
+import TPOStudentAnalytics from "./pages/TPOStudentAnalytics";
+import AdminDashboard from "./pages/AdminDashboard";
 
 function App() {
   return (
@@ -23,6 +26,9 @@ function App() {
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/resume-analyzer" element={<ResumeAnalyzer />} />
         <Route path="/skill-gap" element={<SkillGapAnalyzer />} />
+       <Route path="/tpo/students" element={<TPOStudents />} />
+<Route path="/tpo/student/:email" element={<TPOStudentAnalytics />} />
+<Route path="/admin" element={<AdminDashboard />} />
       </Routes>
     </Router>
   );

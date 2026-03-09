@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getProfile } from "../services/profile";
+import AdminDashboard from "./AdminDashboard";
 import {
   FaUser,
   FaChartLine,
@@ -12,10 +13,13 @@ import {
   FaBars,
 } from "react-icons/fa";
 
+
+
 function Dashboard() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const role = localStorage.getItem("role");
 
   useEffect(() => {
     const email = localStorage.getItem("email");
@@ -41,6 +45,13 @@ function Dashboard() {
     localStorage.clear();
     navigate("/");
   };
+  if (role === "Admin") {
+  return <AdminDashboard />;
+}
+
+if (role === "TPO") {
+  return <TPODashboard user={user} logout={logout} />;
+}
 
   return (
     <div className="flex min-h-screen bg-gray-100">
@@ -321,6 +332,90 @@ function Stat({ title, value }) {
       <h3 className="text-3xl font-bold">{value}</h3>
       <p className="text-sm mt-2">{title}</p>
     </motion.div>
+  );
+}
+
+
+function TPODashboard() {
+
+  const navigate = useNavigate();
+  const logout = () => {
+    localStorage.clear();
+    navigate("/");
+  };
+
+  return (
+
+<div className="flex min-h-screen bg-gray-100">
+
+{/* SIDEBAR */}
+
+<div className="w-64 bg-purple-900 text-white p-6 space-y-6">
+
+<h2 className="text-2xl font-bold">TPO Panel</h2>
+
+<div className="space-y-4">
+
+<div
+onClick={()=>navigate("/tpo/students")}
+className="cursor-pointer hover:bg-purple-700 p-3 rounded"
+>
+Students
+</div>
+
+<div
+onClick={()=>navigate("/tpo/resume")}
+className="cursor-pointer hover:bg-purple-700 p-3 rounded"
+>
+Resume Analytics
+</div>
+
+<div
+onClick={()=>navigate("/tpo/skills")}
+className="cursor-pointer hover:bg-purple-700 p-3 rounded"
+>
+Skill Gap Reports
+</div>
+
+</div>
+
+</div>
+
+{/* MAIN */}
+
+<div className="flex-1 p-10">
+
+<div className="flex justify-between mb-10">
+
+<h1 className="text-3xl font-bold text-purple-900">
+TPO Dashboard
+</h1>
+
+<button
+onClick={logout}
+className="bg-purple-800 text-white px-4 py-2 rounded-lg"
+>
+Logout
+</button>
+
+</div>
+
+<div className="bg-white p-8 rounded-xl shadow">
+
+<h2 className="text-xl font-bold mb-4">
+Welcome to TPO Dashboard
+</h2>
+
+<p className="text-gray-600">
+View student resume analysis, skill gap reports and placement readiness.
+</p>
+
+</div>
+
+</div>
+
+</div>
+
   );
 }
 
