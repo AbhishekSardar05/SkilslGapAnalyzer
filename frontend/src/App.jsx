@@ -8,6 +8,7 @@ import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import ResetPassword from "./pages/ResetPassword";
 import ResumeAnalyzer from "./pages/ResumeAnalyzer";
+import SkillGapAnalyzer from "./pages/SkillGapAnalyzer";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/resume-analyzer" element={<ResumeAnalyzer />} />
+        <Route path="/skill-gap" element={<SkillGapAnalyzer />} />
       </Routes>
     </Router>
   );
